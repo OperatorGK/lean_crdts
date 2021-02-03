@@ -1,0 +1,8 @@
+[package]
+name = "lean_crdts"
+version = "0.1"
+lean_version = "leanprover-community/lean:3.26.0"
+path = "src"
+
+[dependencies]
+mathlib = {git = "https://github.com/leanprover-community/mathlib", rev = "bb15b1ce52d7dbc7f9d1040eae1bade403c91a73"}
