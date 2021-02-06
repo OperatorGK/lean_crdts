@@ -13,39 +13,39 @@ def value {n: ℕ} (g: gcounter n) : ℕ :=
 
 lemma merge_idempotent {n: ℕ} (g: gcounter n) : merge g g = g :=
 begin
-  rw merge,
-  ext1,
-  simp,
+  dsimp only [merge],
+  apply array.ext,
+  intro,
+  simp only [array.read_map₂, max_eq_right, eq_self_iff_true],
 end
 
 lemma merge_commutative {n: ℕ} (g₁ g₂: gcounter n) : merge g₁ g₂ = merge g₂ g₁ :=
 begin
-  repeat {rw merge},
-  ext1,
-  simp,
-  rw max_comm,
+  dsimp only [merge],
+  apply array.ext,
+  intro,
+  simp only [array.read_map₂, max_comm],
 end
 
 lemma merge_associative
  {n: ℕ} (g₁ g₂ g₃: gcounter n) : merge g₁ (merge g₂ g₃) = merge (merge g₁ g₂) g₃ :=
 begin
-  repeat {rw merge},
-  ext1,
-  simp,
-  rw max_assoc,
+  dsimp only [merge],
+  apply array.ext,
+  intro,
+  simp only [array.read_map₂, max_assoc],
 end
 
 lemma inc_merge_increasing
   {n: ℕ} (v: ℕ) (i: fin n) (g: gcounter n) : merge (inc g i v) g = inc g i v :=
 begin
-  rw merge,
-  rw inc,
-  ext1,
-  simp,
+  dsimp only [merge, inc],
+  apply array.ext,
+  intro,
+  simp only [array.read_map₂, max_eq_left_iff],
 
   by_cases i = i_1,
-  rw h,
-  rw array.read_write,
+  simp only [h, array.read_write],
   linarith,
 
   rwa array.read_write_of_ne,
@@ -56,10 +56,7 @@ lemma inc_value_increasing_aux₁
 begin
   induction li generalizing a b,
   refl,
-
-  rw list.foldl,
-  rw add_right_comm,
-  apply li_ih,
+  simp only [list.foldl, add_right_comm, li_ih],
 end
 
 lemma inc_value_increasing_aux₂
@@ -73,14 +70,8 @@ begin
   linarith,
   
   cases i_val,
-  all_goals {
-    rw list.update_nth,
-    rw list.nth_le,
-    rw list.foldl,
-    rw list.foldl,
-  },
+  simp only [list.update_nth, list.nth_le, list.foldl, ← add_assoc],
 
-  rw ← add_assoc,
   apply inc_value_increasing_aux₁,
   apply li_ih,
 end
@@ -88,59 +79,15 @@ end
 lemma inc_value_increasing
   {n: ℕ} (v: ℕ) (i: fin n) (g: gcounter n) : value (inc g i v) = value g + v :=
 begin
-  rw inc,
-  rw value,
-  rw value,
+  simp only [inc, value, ← array.to_list_foldl, array.write_to_list],
 
-  rw ← array.to_list_foldl,
-  rw ← array.to_list_foldl,
-  rw array.write_to_list,
   cases i,
-  rw ← array.to_list_nth_le,
-  any_goals { rwa array.to_list_length },
+  rw [← array.to_list_nth_le],
 
   generalize h : array.to_list g = li,
-
-  conv {
-    to_lhs,
-    congr,
-    skip,
-    skip,
-    congr,
-    rw h,
-    
-    skip,
-    skip,
-    congr,
-    congr,
-    rw h,
-  },
-
-  conv {
-    to_rhs,
-    congr,
-    congr,
-    skip,
-    skip,
-    rw h,
-  },
-
-  conv {
-    to_lhs,
-    congr,
-    funext,
-    rw add_comm,
-  }, 
-
-  conv {
-    to_rhs,
-    congr,
-    congr,
-    funext,
-    rw add_comm,
-  },
-  
-  ring,
-
+  simp only [h, add_comm],
+  rw [add_comm, add_comm v],
   apply inc_value_increasing_aux₂,
+  
+  rwa array.to_list_length,
 end
